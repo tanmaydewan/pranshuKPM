@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:kpmg_employees/entry.dart';
+import 'package:kpmg_employees/viewdb_page.dart';
 import './login_page.dart';
 import './new_entry_page.dart';
 
@@ -84,7 +86,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       ),),
                     child: const Text('Review Past Entries', style: TextStyle(fontSize: 20, color: Color(0xff3249ab))),
                     onPressed: () {
-
+                              Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (BuildContext context) => new AllEntries()));
+           
                     },
                   )]
               )

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:kpmg_employees/login_page.dart';
+import 'package:kpmg_employees/widget/app_icon_widget.dart';
 import 'package:kpmg_employees/widget/device_utils.dart';
 import 'package:kpmg_employees/widget/progress_indicator_widget.dart';
 import 'package:kpmg_employees/widget/rounded_button_widget.dart';
@@ -17,7 +18,7 @@ class SignUp extends StatefulWidget {
 
 class _EmployeRegistration extends State<SignUp> {
   final controllerUsername = TextEditingController();
-
+  final controllerEmpId = TextEditingController();
   final controllerPassword = TextEditingController();
   final controllerAdharNumber = TextEditingController();
   final controllerEmail = TextEditingController();
@@ -55,17 +56,12 @@ class _EmployeRegistration extends State<SignUp> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   // SizedBox(height: 24.0),
-                  Row(
+                  Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        IconButton(
-                            onPressed: () => _backPressed(),
-                            icon: Image.asset(
-                              "assets/back_icon.png",
-                              height: 40,
-                              width: 40,
-                            )),
+                        SizedBox(height: 20,),
+                        AppIconWidget(image: 'assets/KPMG_logo.png'),
                         SizedBox(
                           width: 8,
                         ),
@@ -116,6 +112,7 @@ class _EmployeRegistration extends State<SignUp> {
           children: <Widget>[
             // AppIconWidget(image: 'assets/ic_logo.png'),
             SizedBox(height: 50.0),
+            _buildEmpId(),
             _buildUserName(),
             _buildUserEmail(),
             _buildPasswordField(),
@@ -128,16 +125,16 @@ class _EmployeRegistration extends State<SignUp> {
     );
   }
 
-  Widget _buildAdhaarNumber() {
+  Widget _buildEmpId() {
     return Observer(
       builder: (context) {
         return TextFieldWidget(
-          hint: 'Enter Aadhar Number',
-          inputType: TextInputType.emailAddress,
-          padding: EdgeInsets.only(top: 16.0),
+          hint: 'Enter Employee Id',
+          inputType: TextInputType.number,
+          //padding: EdgeInsets.all( 16.0),
           icon: Icons.credit_card,
           iconColor: Colors.black54,
-          textController: controllerAdharNumber,
+          textController: controllerEmpId,
           errorText: null,
         );
       },
@@ -170,7 +167,7 @@ class _EmployeRegistration extends State<SignUp> {
         return TextFieldWidget(
           hint: 'Enter Email',
           inputType: TextInputType.emailAddress,
-          padding: EdgeInsets.only(top: 16.0),
+         // padding: EdgeInsets.only(top: 16.0),
           icon: Icons.lock,
           iconColor: Colors.black54,
           textController: controllerEmail,
@@ -256,25 +253,29 @@ class _EmployeRegistration extends State<SignUp> {
   }
 
   bool _canSignUp() {
+    var EmpId = controllerEmpId.text.trim();
     var username = controllerUsername.text.trim();
     var email = controllerEmail.text.trim();
     var password = controllerPassword.text.trim();
     if (email.length == 0 ||
         password.length == 0 ||
-        username.length == 0 ) {
+        username.length == 0 ||
+        EmpId.length==0 ) {
       return false;
     }
     return true;
   }
 
   void doUserRegistration() async {
+    
+    final empId = controllerEmpId.text.trim();
     final username = controllerUsername.text.trim();
     final email = controllerEmail.text.trim();
     final password = controllerPassword.text.trim();
     
 
     var user = ParseUser.createUser(username, password, email);
-    
+    user..set("EmpId", empId);
 
     var response = await user.save();
     if (response.success) {

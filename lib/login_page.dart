@@ -76,20 +76,27 @@ class _LogInScreenState extends State<LogInScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            AppIconWidget(image: 'assets/KPMG_logo_2.png'),
+            AppIconWidget(image: 'assets/KPMG_logo.png'),
             SizedBox(height: 64.0),
             _buildUserIdField(),
             _buildPasswordField(),
             SizedBox(height: 24.0),
             _buildSignInButton(),
-            GestureDetector(
-              onTap: (){
-                 Navigator.pushReplacement(
+            SizedBox(height: 40,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Don't have an account! "),
+                GestureDetector(
+                  onTap: (){
+                     Navigator.push(
           context,
           new MaterialPageRoute(
-              builder: (BuildContext context) => new SignUp()));
-              },
-              child: Text("SignUp"))
+                  builder: (BuildContext context) => new SignUp()));
+                  },
+                  child: Text("SignUp",style: TextStyle(color: Colors.blue),)),
+              ],
+            )
           ],
         ),
       ),
@@ -177,7 +184,7 @@ class _LogInScreenState extends State<LogInScreen> {
       _isLoading = false;
     });
     if (response.success) {
-      Navigator.pushReplacement(
+      Navigator.push(
           context,
           new MaterialPageRoute(
               builder: (BuildContext context) => new WelcomePage()));
