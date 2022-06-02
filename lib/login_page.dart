@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kpmg_employees/signup_page.dart';
 import 'package:kpmg_employees/welcome_page.dart';
 import 'package:kpmg_employees/widget/app_icon_widget.dart';
 import 'package:kpmg_employees/widget/device_utils.dart';
@@ -80,7 +81,15 @@ class _LogInScreenState extends State<LogInScreen> {
             _buildUserIdField(),
             _buildPasswordField(),
             SizedBox(height: 24.0),
-            _buildSignInButton()
+            _buildSignInButton(),
+            GestureDetector(
+              onTap: (){
+                 Navigator.pushReplacement(
+          context,
+          new MaterialPageRoute(
+              builder: (BuildContext context) => new SignUp()));
+              },
+              child: Text("SignUp"))
           ],
         ),
       ),
@@ -136,6 +145,7 @@ class _LogInScreenState extends State<LogInScreen> {
       },
     );
   }
+
 
   bool _canLogin() {
     var email = _userEmailController.text.trim();
