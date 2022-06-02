@@ -58,7 +58,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           Container(
               padding: const EdgeInsets.only(left: 10),
               child: Text(
-                Users[check]['full_name']!,
+                name,
                 style: TextStyle(fontSize: 40, color: Color(0xff3249ab), fontWeight: FontWeight.w500),
               )),
           Container(

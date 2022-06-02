@@ -1,237 +1,236 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:kpmg_employees/custom_dialogue_box.dart';
-import 'package:kpmg_employees/signup_page.dart';
 import 'package:kpmg_employees/welcome_page.dart';
-import 'package:path/path.dart';
-import './new_entry_page.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:kpmg_employees/widget/app_icon_widget.dart';
+import 'package:kpmg_employees/widget/device_utils.dart';
+import 'package:kpmg_employees/widget/progress_indicator_widget.dart';
+import 'package:kpmg_employees/widget/rounded_button_widget.dart';
+import 'package:kpmg_employees/widget/textfield_widget.dart';
+import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
-import 'viewdb_page.dart';
-
-int check = -1;
-int search_name_in_list(String name,List list){
-  for(int i=0;i<list.length;i++){
-    if(list[i]['full_name']==name||list[i]['user_name']==name||list[i]['email']==name)
-      {
-        return i;
-      }
-  }
-  return -1;
+class LogInScreen extends StatefulWidget {
+  @override
+  _LogInScreenState createState() => _LogInScreenState();
 }
+var name;
+class _LogInScreenState extends State<LogInScreen> {
+  TextEditingController _userEmailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  var _isLoading;
 
-var Users = [
-  {'full_name':'Akhilesh Manikandan','user_name':'akhilesh_mani','password':'kpmg','email':'akhileshm1@kpmg.com'},
-  {'full_name':'Devanshi Aggarwal','user_name':'devanshi_a','password':'kpmg', 'email':'devanshia@kpmg.com.com'},
-  {'full_name':'Devanshi Aggarwal','user_name':'devanshi_a','password':'kpmg','email':'prathits@kpmg.com'}
-];
-List employee_list = [];
-void get_from_db() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  final database = openDatabase(
-    join(await getDatabasesPath(), 'database2.db'),
-    onCreate: (db, version) {
-      return db.execute(
-        'CREATE TABLE database2(id INTEGER PRIMARY KEY, name TEXT, designation TEXT, project TEXT, initiative TEXT, engagement_manager TEXT, start_date TEXT, end_date TEXT)',
-      );
-    },
-    version: 1,
-  );
-  Future<List<Employee_details>> database2() async {
-    // Get a reference to the database.
-    final db = await database;
-
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('database2');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return Employee_details(
-        id: maps[i]['id'],
-        name: maps[i]['name'],
-        designation: maps[i]['designation'],
-        project: maps[i]['project'],
-        initiative: maps[i]['initiative'],
-        engagement_manager: maps[i]['engagement_manager'],
-        start_date: maps[i]['start_date'],
-        end_date: maps[i]['end_date'],
-      );
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _isLoading = false;
     });
   }
-  employee_list = await database2();
-  //print(await database2());
-}
-
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
-  static const String _title = 'LOGIN';
 
   @override
   Widget build(BuildContext context) {
-    get_from_db();
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(icon: Icon(Icons.menu), onPressed: (){},),
-          centerTitle: true,
-          title: Text(_title),
-          backgroundColor: Color(0xff3249ab),),
-        body: const MyStatefulWidget(),
+    return Scaffold(
+      primary: true,
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    return Material(
+      child: Stack(
+        children: <Widget>[
+          MediaQuery.of(context).orientation == Orientation.landscape
+              ? Row(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: _buildRightSide(),
+                    ),
+                  ],
+                )
+              : Center(child: _buildRightSide()),
+          // Observer(
+          //   builder: (context) {
+          //     return _showError
+          //         ? null
+          //         : _showErrorMessage(
+          //             'Unable to sign in. Please try again or contact the Admin',
+          //             context);
+          //   },
+          // ),
+          Visibility(
+            visible: _isLoading,
+            child: CustomProgressIndicatorWidget(),
+          )
+        ],
       ),
+    );
+  }
+
+  Widget _buildRightSide() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            AppIconWidget(image: 'assets/KPMG_logo_2.png'),
+            SizedBox(height: 64.0),
+            _buildUserIdField(),
+            _buildPasswordField(),
+            SizedBox(height: 24.0),
+            _buildSignInButton()
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserIdField() {
+    return Observer(
+      builder: (context) {
+        return TextFieldWidget(
+          hint: 'Enter email',
+          inputType: TextInputType.emailAddress,
+          icon: Icons.person,
+          iconColor: Colors
+              .black54, //_themeStore.darkMode ? Colors.white70 : Colors.black54,
+          textController: _userEmailController,
+          inputAction: TextInputAction.next,
+          autoFocus: false,
+          errorText: null,
+        );
+      },
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return Observer(
+      builder: (context) {
+        return TextFieldWidget(
+          hint: 'Enter password',
+          isObscure: true,
+          padding: EdgeInsets.only(top: 16.0),
+          icon: Icons.lock,
+          iconColor: Colors.black54,
+          textController: _passwordController,
+          errorText: null,
+        );
+      },
+    );
+  }
+
+  Widget _buildSignInButton() {
+    return RoundedButtonWidget(
+      buttonText: 'Sign in',
+      buttonColor: Colors.orangeAccent,
+      textColor: Colors.white,
+      onPressed: () {
+        if (_canLogin()) {
+          DeviceUtils.hideKeyboard(context);
+          _signin(context);
+        } else {
+          _showErrorMessage('Please fill in all fields', context);
+        }
+      },
+    );
+  }
+
+  bool _canLogin() {
+    var email = _userEmailController.text.trim();
+    var password = _passwordController.text.trim();
+    if (email.length == 0 || password.length == 0) {
+      return false;
+    }
+    return true;
+  }
+
+  void _signin(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+      name=_userEmailController.text.trim();
+    });
+    final username = _userEmailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    final QueryBuilder<ParseObject> parseQuery =
+        QueryBuilder<ParseObject>(ParseObject('User'));
+    parseQuery.whereEqualTo("objectId", username);
+    print("objectid  = = ==   $parseQuery");
+    final user = ParseUser(username, password, null);
+
+    var response = await user.login();
+    
+
+    setState(() {
+      _isLoading = false;
+    });
+    if (response.success) {
+      Navigator.pushReplacement(
+          context,
+          new MaterialPageRoute(
+              builder: (BuildContext context) => new WelcomePage()));
+      // navigateToNextScreen(context);
+    } else {
+      _showErrorMessage("Login failed. Check your credentials", context);
+    }
+  }
+
+  void _showErrorMessage(String message, BuildContext context) {
+    if (message.isNotEmpty) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> navigateToNextScreen(BuildContext context) async {
+    bool a = await adminCheck();
+    if (a == true) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => WelcomePage()));
+    } else {
+      Text("data");
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the Widget is removed from the Widget tree
+    _userEmailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+}
+
+// ignore: camel_case_types
+class Login_Successfull extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.green,
     );
   }
 }
 
-
-TextEditingController nameController = TextEditingController();
-TextEditingController passwordController = TextEditingController();
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+Future<bool> adminCheck() async {
+  ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
+  final a = currentUser["isAdmin"];
+  return a;
 }
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-
-  bool validate_name = false;
-  //bool validate_username = true;
-  bool isHiddenPassword = true;
-  @override
-  Widget build(BuildContext context) {
-
-    return Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
-          children: <Widget>[
-            Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(5),
-                child: Image(
-                    height: 150,
-                    width: 200,
-                    image: AssetImage('assets/KPMG_logo.png')
-                )
-            ),
-
-            Container(
-                padding: const EdgeInsets.all(5),
-                child: const Text(
-                  'Username',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                )),
-            Container(
-              padding: EdgeInsets.all(5),
-              child: TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  errorText: validate_name ? 'Value Can\'t Be Empty' : null,
-                  border: OutlineInputBorder(),
-                  labelText: 'Phone no, Username or Email',
-                ),
-              ),
-            ),
-            Container(
-                padding: const EdgeInsets.all(5),
-                child: const Text(
-                  'Password',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                )),
-
-            Container(
-
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: TextField(
-
-                  obscureText: isHiddenPassword,
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Enter Password',
-                      suffixIcon: InkWell(
-                          onTap: _togglepasswordView,
-                          child: Icon(
-                            isHiddenPassword ? Icons.visibility : Icons.visibility_off,)
-                      )
-                  )
-              ),
-            ),
-
-            TextButton(
-              onPressed: () {
-                //forgot password screen
-              },
-              child: const Text('Forgot Password ?',
-                  style: TextStyle(fontSize: 17,color: Color(0xff3249ab), fontWeight: FontWeight.bold)),
-            ),
-            Container(
-                height: 50,
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(primary: Color(0xff3249ab)),
-                  child: const Text('Login', style: TextStyle(fontSize: 20),),
-                  onPressed: () {
-                      setState(() {
-                        nameController.text.isEmpty ? validate_name = true :validate_name = false;
-                      });
-                    if(nameController.text=='admin'){
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ViewDB()));
-                    }
-                    else {
-                      check = search_name_in_list(nameController.text, Users);
-                      if(check==-1)
-                        {
-                          showDialog(context: context, builder: (context){
-                            return CustomDialogBox(title: "Oops!", descriptions: "It seems like the username you have entrered does not exist. Kindly check the username once again.\n\n If you do not have an account, tap Sign Up to create one", text: "Okay", img: Image.asset("assets/exclamation_mark.png"));
-                          });
-                        }
-                      else {
-                        if(passwordController.text == Users[check]['password']){
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => WelcomePage()));}
-                        else{
-                          showDialog(context: context, builder: (context){
-                            return CustomDialogBox(title: "Oops!", descriptions: "It seems like the password you have entered does not match with the username. Kindly check the username/password once again.\n\n If you do not have an account, tap Sign Up to create one", text: "Okay", img: Image.asset("assets/exclamation_mark.png"));
-                          });
-                        }
-                      }
-                    }
-                    //print(nameController.text);
-                    //print(passwordController.text);
-                  },
-                )
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text('Do not have an account?'),
-                TextButton(
-                  child: const Text(
-                    'Sign Up',
-                    style: TextStyle(fontSize: 17, color: Color(0xff3249ab), fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Signup()));
-                    //signup screen
-                  },
-                )
-              ],
-
-            ),
-          ],
-        ));
-  }
-  void _togglepasswordView(){
-    if(isHiddenPassword == true){
-      isHiddenPassword = false;
-    }else{
-      isHiddenPassword = true;
-    }
-    setState(() {});
-  }
-}
-
